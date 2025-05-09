@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from api.models import TripBase, TripDB, PyObjectId
 from typing import List
 from core.database import trips_col
@@ -66,3 +66,33 @@ async def delete_trip(trip_id: str):
         return {"message": "Trip and associated messages deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting trip: {str(e)}")
+
+
+@router.patch("/{trip_id}", response_model=TripDB)
+async def update_trip_name(trip_id: str, data: dict = Body(...)):
+    try:
+        object_id = PyObjectId(trip_id)
+
+        update_data = {}
+        if "name" in data:
+            update_data["name"] = data["name"]
+
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+
+        result = await trips_col.update_one(
+            {"_id": object_id},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Trip not found or not modified")
+
+        updated_trip = await trips_col.find_one({"_id": object_id})
+        updated_trip["_id"] = str(updated_trip["_id"])
+        updated_trip["user_id"] = str(updated_trip["user_id"])
+
+        return updated_trip
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating trip: {str(e)}")

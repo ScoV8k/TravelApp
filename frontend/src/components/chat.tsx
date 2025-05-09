@@ -100,25 +100,34 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     <div className="flex flex-col w-full h-full overflow-hidden">
       {/* WIADOMOŚCI */}
       <div className="flex-1 overflow-y-auto w-full px-6 py-4">
-        <div className="max-w-3xl mx-auto space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg._id || msg.timestamp + msg.text}
-              className={
-                msg.isUser
-                  ? // USER: dymek po prawej, max-w-md
-                    "ml-auto w-fit max-w-md break-words rounded-lg bg-gray-200 px-4 py-2 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-                  : // AI: cała szerokość max-w-3xl
-                    "w-full break-words text-foreground"
-              }
-              style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
-            >
-              {msg.text}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+  <div className="max-w-3xl mx-auto space-y-4 h-full flex flex-col">
+    {messages.length === 0 ? (
+      <div className="flex flex-1 items-center justify-center">
+        <h1 className="text-3xl font-semibold text-muted-foreground text-center">
+          Zacznij planować swoją podróż ✈️
+        </h1>
       </div>
+    ) : (
+      <>
+        {messages.map((msg) => (
+          <div
+            key={msg._id || msg.timestamp + msg.text}
+            className={
+              msg.isUser
+                ? "ml-auto w-fit max-w-md break-words rounded-lg bg-gray-200 px-4 py-2 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                : "w-full break-words text-foreground"
+            }
+            style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
+          >
+            {msg.text}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </>
+    )}
+  </div>
+</div>
+
   
       {/* INPUT NA DOLE */}
       <div className="p-4 w-full">

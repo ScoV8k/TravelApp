@@ -1,31 +1,46 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
+} from "@/components/ui/navigation-menu"
+
+import { useTrip } from "@/app/context/TripContext"
 
 export function NavigationMenuDemo() {
-  const pathname = usePathname();
+  const pathname = usePathname()
+  const { tripName, tripId: contextTripId } = useTrip()
+
+  // fallback: jeśli nie mamy tripId w kontekście, wyciągamy je z pathname
+  const tripIdMatch = pathname.match(/(?:\/trip|\/travelplan|\/checklists)\/([^/]+)/)
+  const tripId = contextTripId || (tripIdMatch ? tripIdMatch[1] : null)
+  
 
   return (
     <NavigationMenu>
       <NavigationMenuList>
-        {/* Chat link */}
+        {/* Chat */}
         <NavigationMenuItem>
-          <Link href="/" passHref legacyBehavior>
+          <Link
+            href={tripId ? `/trip/${tripId}` : "/"}
+            passHref
+            legacyBehavior
+          >
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                pathname === "/" && "bg-accent text-accent-foreground"
+                (pathname === "/" || pathname.startsWith("/trip/")) &&
+                  !pathname.includes("travelplan") &&
+                  !pathname.includes("checklists") &&
+                  "bg-accent text-accent-foreground"
               )}
             >
               Chat
@@ -33,13 +48,17 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Travel Plan link */}
+        {/* Travel Plan */}
         <NavigationMenuItem>
-          <Link href="/plan" passHref legacyBehavior>
+          <Link
+            href={tripId ? `/travelplan/${tripId}` : "/travelplan"}
+            passHref
+            legacyBehavior
+          >
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
-                pathname.startsWith("/plan") && "bg-accent text-accent-foreground"
+                pathname.startsWith("/travelplan") && "bg-accent text-accent-foreground"
               )}
             >
               Travel Plan
@@ -47,9 +66,13 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Checklists link */}
+        {/* Checklists */}
         <NavigationMenuItem>
-          <Link href="/checklists" passHref legacyBehavior>
+          <Link
+            href={tripId ? `/checklists/${tripId}` : "/checklists"}
+            passHref
+            legacyBehavior
+          >
             <NavigationMenuLink
               className={cn(
                 navigationMenuTriggerStyle(),
@@ -60,7 +83,21 @@ export function NavigationMenuDemo() {
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+
+        {/* Nazwa tripa */}
+        {tripId && tripName && (
+          <NavigationMenuItem>
+            <span
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "text-muted-foreground cursor-default pointer-events-none"
+              )}
+            >
+              {tripName}
+            </span>
+          </NavigationMenuItem>
+        )}
       </NavigationMenuList>
     </NavigationMenu>
-  );
+  )
 }

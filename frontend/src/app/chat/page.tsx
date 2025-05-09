@@ -6,9 +6,9 @@ import { Chat } from "@/components/chat";
 export default function Home() {
   return (
     <div className="w-full">
-    <div className="bg-blue-500 text-white p-6 rounded-lg shadow-lg">
-  <h1 className="text-2xl font-bold">Mój projekt z Tailwind CSS</h1>
-  <p className="mt-4">Next.js + Tailwind CSS działa poprawnie!</p>
+    <div>
+  {/* <h1 className="text-2xl font-bold">Mój projekt z Tailwind CSS</h1>
+  <p className="mt-4">Next.js + Tailwind CSS działa poprawnie!</p> */}
   <NavigationMenu></NavigationMenu>
   {/* <ChatBotUi></ChatBotUi> */}
 </div>

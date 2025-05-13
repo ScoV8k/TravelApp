@@ -3,21 +3,53 @@ from api.models import TripBase, TripDB, PyObjectId
 from typing import List
 from core.database import trips_col
 from core.database import messages_col
+from travelplan.traveljson import get_empty_plan
+
 
 router = APIRouter(prefix="/trips", tags=["Trips"])
-
 @router.post("/", response_model=TripDB)
 async def create_trip(trip: TripBase):
-    trip_dict = trip.model_dump(by_alias=True)
-    result = await trips_col.insert_one(trip_dict)
-    new_trip = await trips_col.find_one({"_id": result.inserted_id})
+    from core.database import plans_col
+    from datetime import datetime
 
+    # 1. Stworzenie tripa bez plan_id
+    trip_dict = trip.model_dump(by_alias=True)
+    trip_dict["plan_id"] = None
+    result = await trips_col.insert_one(trip_dict)
+
+    # 2. Pobierz szkielet planu z funkcji
+    try:
+        empty_plan = get_empty_plan()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Nie udało się wygenerować szkieletu planu: {str(e)}")
+
+    # 3. Tworzymy plan z szablonem
+    trip_id = result.inserted_id
+    plan_doc = {
+        "trip_id": trip_id,
+        "data": empty_plan,
+        "updated_at": datetime.utcnow(),
+        "checklist": []
+    }
+    plan_result = await plans_col.insert_one(plan_doc)
+    plan_id = plan_result.inserted_id
+
+    # 4. Aktualizacja tripa o plan_id
+    await trips_col.update_one(
+        {"_id": trip_id},
+        {"$set": {"plan_id": plan_id}}
+    )
+
+    # 5. Zwracamy nowo utworzony trip
+    new_trip = await trips_col.find_one({"_id": trip_id})
     if not new_trip:
         raise HTTPException(status_code=500, detail="Failed to retrieve created trip")
     
     new_trip["_id"] = str(new_trip["_id"])
     new_trip["user_id"] = str(new_trip["user_id"])
+    new_trip["plan_id"] = str(plan_id)
     return new_trip
+
 
 
 @router.get("/{trip_id}", response_model=TripDB)
@@ -27,6 +59,7 @@ async def get_trip(trip_id: str):
         trip = await trips_col.find_one({"_id": object_id})
         trip["_id"] = str(trip["_id"])
         trip["user_id"] = str(trip["user_id"])
+        trip["plan_id"] = str(trip["plan_id"])
         if not trip:
             raise HTTPException(status_code=404, detail="Trip not found")
         return trip
@@ -43,10 +76,10 @@ async def get_trips_by_user(user_id: str):
         for trip in trips:
             trip["_id"] = str(trip["_id"])
             trip["user_id"] = str(trip["user_id"])
+            trip["plan_id"] = str(trip["plan_id"])
 
         return trips
 
-        return trips
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve trips: {str(e)}")
 

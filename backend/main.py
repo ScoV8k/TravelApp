@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import api.users as users
 import api.trips as trips
 import api.messages as messages
+import api.plans as plans
 import api.auth as auth
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,6 +19,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(trips.router)
 app.include_router(messages.router)
+app.include_router(plans.router)
 app.include_router(auth.router)
 
 if __name__ == "__main__":

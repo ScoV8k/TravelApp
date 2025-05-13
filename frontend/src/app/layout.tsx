@@ -6,8 +6,10 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { NavigationMenuDemo } from "@/components/navigation-menu";
 import { usePathname } from "next/navigation";
 import { TripProvider } from "./context/TripContext";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  useAuthRedirect()
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
   return (

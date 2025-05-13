@@ -55,7 +55,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         const tripRes = await fetch("http://localhost:8000/trips/", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ user_id: userId, name: "New Trip", status: "draft", created_at: new Date().toISOString(), plan: {} }),
+          body: JSON.stringify({ user_id: userId, name: "New Trip", status: "draft", created_at: new Date().toISOString()}),
         })
         if (!tripRes.ok) throw new Error('Failed to create trip');
         const tripData = await tripRes.json()
@@ -76,8 +76,15 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
       
       const [userMsgRes, botRes] = await Promise.all([userMsgPromise, botResponsePromise]);
 
-      if (!userMsgRes.ok) throw new Error('Failed to save user message');
-      if (!botRes.ok) throw new Error('Failed to get bot response');
+      if (!userMsgRes.ok) {
+        console.error("❌ Błąd przy zapisie user message");
+        throw new Error('Failed to save user message');
+      }
+      if (!botRes.ok) {
+        console.error("❌ Błąd przy odpowiedzi bota");
+        throw new Error('Failed to get bot response');
+      }
+      
 
       const botData = await botRes.json()
       const botMessage: Message = { trip_id: currentTripId, text: botData.response, isUser: false, timestamp: new Date().toISOString() }
@@ -86,6 +93,40 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(botMessage),
       })
       setMessages((prev) => [...prev, botMessage])
+      
+      console.log(currentTripId)
+      
+      const updateRes = await fetch("http://127.0.0.1:8001/update-plan/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trip_id: currentTripId,
+          last_user_message: userMessage.text,
+          bot_response: botMessage.text
+        })
+      });
+      
+      if (!updateRes.ok) {
+        const errorText = await updateRes.text();
+        console.error("❌ Błąd w /update-plan/:", updateRes.status, errorText);
+      } else {
+        const updateData = await updateRes.json();
+        console.log("✅ Plan zaktualizowany:", updateData);
+      }
+      
+      
+      
+      
+
+      // await fetch("http://127.0.0.1:8001/update-plan/", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     trip_id: currentTripId,
+      //     chat_history: [...messages, userMessage, botMessage].map(m => m.text)
+      //   })
+      // })
+      
 
     } catch (error) {
       console.error("Błąd przy wysyłaniu wiadomości:", error)

@@ -10,6 +10,7 @@ export default function Home() {
     <div className="flex flex-col h-full w-full">
       <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-4 pt-10">
         <Chat />
+
       </div>
     </div>
   )

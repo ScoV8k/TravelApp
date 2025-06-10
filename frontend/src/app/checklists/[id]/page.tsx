@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 
 interface ChecklistItem {
-  id: string
-  text: string
+  id: number
+  name: string
   checked: boolean
 }
 
@@ -18,26 +18,72 @@ export default function ChecklistPage() {
 
   const [items, setItems] = useState<ChecklistItem[]>([])
   const [newItemText, setNewItemText] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
 
+  // --- Pobierz checklistę z backendu przy starcie ---
+  useEffect(() => {
+    async function fetchChecklist() {
+      try {
+        const res = await fetch(`http://localhost:8000/information/trip/${tripId}/checklist`)
+        if (!res.ok) throw new Error("Failed to load checklist")
+        const data: ChecklistItem[] = await res.json()
+        setItems(data)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (tripId) fetchChecklist()
+  }, [tripId])
+
+  // --- Dodaj nowy element do checklisty ---
+  async function addItem(name: string) {
+    setIsSaving(true)
+    try {
+      const res = await fetch(`http://localhost:8000/information/trip/${tripId}/checklist/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      })
+      if (!res.ok) throw new Error("Failed to add checklist item")
+      const updatedChecklist: ChecklistItem[] = await res.json()
+      setItems(updatedChecklist)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // --- Toggle checked dla pojedynczego elementu ---
+  async function toggleItemChecked(id: number, checked: boolean) {
+    setIsSaving(true)
+    try {
+      const res = await fetch(`http://localhost:8000/information/trip/${tripId}/checklist/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(checked),
+      })
+      if (!res.ok) throw new Error("Failed to update checklist item")
+
+      const updatedChecklist: ChecklistItem[] = await res.json()
+      setItems(updatedChecklist)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handler dodawania
   const handleAddItem = () => {
     if (!newItemText.trim()) return
-
-    const newItem: ChecklistItem = {
-      id: crypto.randomUUID(),
-      text: newItemText.trim(),
-      checked: false,
-    }
-
-    setItems((prev) => [...prev, newItem])
+    addItem(newItemText.trim())
     setNewItemText("")
   }
 
-  const toggleItem = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    )
+  // Handler toggle
+  const handleToggle = (id: number, currentChecked: boolean) => {
+    toggleItemChecked(id, !currentChecked)
   }
 
   return (
@@ -55,8 +101,11 @@ export default function ChecklistPage() {
               handleAddItem()
             }
           }}
+          disabled={isSaving}
         />
-        <Button onClick={handleAddItem}>Add</Button>
+        <Button onClick={handleAddItem} disabled={isSaving || !newItemText.trim()}>
+          {isSaving ? "Saving..." : "Add"}
+        </Button>
       </div>
 
       <div className="space-y-4">
@@ -65,13 +114,14 @@ export default function ChecklistPage() {
             <Checkbox
               id={`item-${item.id}`}
               checked={item.checked}
-              onCheckedChange={() => toggleItem(item.id)}
+              onCheckedChange={() => handleToggle(item.id, item.checked)}
+              disabled={isSaving}
             />
             <label
               htmlFor={`item-${item.id}`}
               className={`text-base ${item.checked ? "line-through text-muted-foreground" : ""}`}
             >
-              {item.text}
+              {item.name}
             </label>
           </div>
         ))}

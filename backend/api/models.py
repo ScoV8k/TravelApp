@@ -59,10 +59,12 @@ class TripBase(BaseModel):
 class TripDB(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId
-    plan_id: PyObjectId  # tylko w zwracanym modelu z bazy
+    information_id: PyObjectId  # tylko w zwracanym modelu z bazy
     name: str
     created_at: datetime
     status: str
+    plan_id: Optional[PyObjectId] = None
+
 
     class Config:
         populate_by_name = True
@@ -94,9 +96,47 @@ class MessageDB(MessageBase):
 
 
 
+# class ChecklistItem(BaseModel):
+#     name: str
+#     checked: bool = False
+
+# class ChecklistItem(BaseModel):
+#     id: int
+#     name: str
+#     checked: bool = False
+    
+
 class ChecklistItem(BaseModel):
+    id: int
     name: str
     checked: bool = False
+
+class Checklist(BaseModel):
+    name: str
+    items: List[ChecklistItem] = []
+
+
+# Plan
+class TripInformationBase(BaseModel):
+    trip_id: PyObjectId
+    data: dict
+    updated_at: datetime
+    checklist: List[Checklist]
+
+    class Config:
+        json_encoders = {ObjectId: str}
+
+class TripInformationDB(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    trip_id: PyObjectId
+    data: dict  # Twój pełny plan jako JSON
+    updated_at: datetime
+    checklist: List[Checklist]
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
 
 
 # Plan
@@ -104,7 +144,6 @@ class PlanBase(BaseModel):
     trip_id: PyObjectId
     data: dict
     updated_at: datetime
-    checklist: List[ChecklistItem]
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -114,9 +153,9 @@ class PlanDB(BaseModel):
     trip_id: PyObjectId
     data: dict  # Twój pełny plan jako JSON
     updated_at: datetime
-    checklist: List[ChecklistItem]
 
     class Config:
         populate_by_name = True
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
+

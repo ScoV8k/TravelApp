@@ -95,7 +95,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
       setMessages((prev) => [...prev, botMessage])
       
       console.log(currentTripId)
-      
+
       const updateRes = await fetch("http://127.0.0.1:8001/update-plan/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,7 +145,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     {messages.length === 0 ? (
       <div className="flex flex-1 items-center justify-center">
         <h1 className="text-3xl font-semibold text-muted-foreground text-center">
-          Zacznij planować swoją podróż ✈️
+          Start planning your trip ✈️
         </h1>
       </div>
     ) : (
@@ -176,7 +176,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Zadaj pytanie..."
+            placeholder="Ask question..."
             className="resize-none grow text-sm pl-2"
             rows={1}
             onKeyDown={(e) => {
@@ -192,7 +192,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
             size="lg"
             className="shrink-0"
           >
-            {isSending ? <Loader2 className="animate-spin h-5 w-5" /> : "Wyślij"}
+            {isSending ? <Loader2 className="animate-spin h-5 w-5" /> : "Send"}
           </Button>
         </div>
 

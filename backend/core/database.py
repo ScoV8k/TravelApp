@@ -13,6 +13,7 @@ users_col = db["users"]
 trips_col = db["trips"]
 messages_col = db["messages"]
 plans_col = db["plans"]
+trips_information_col = db["trips-information"]
 
 # async def insert_test_message():
 #     message = {

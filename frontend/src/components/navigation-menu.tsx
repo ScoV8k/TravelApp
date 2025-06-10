@@ -48,7 +48,7 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Travel Plan */}
+        {/* Travel Information*/}
         <NavigationMenuItem>
           <Link
             href={tripId ? `/travelplan/${tripId}` : "/travelplan"}
@@ -61,7 +61,7 @@ export function NavigationMenuDemo() {
                 pathname.startsWith("/travelplan") && "bg-accent text-accent-foreground"
               )}
             >
-              Travel Plan
+              Travel Information
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -80,6 +80,24 @@ export function NavigationMenuDemo() {
               )}
             >
               Checklists
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+
+          {/* Travel Plan */}
+        <NavigationMenuItem>
+          <Link
+            href={tripId ? `/plan/${tripId}` : "/plan"}
+            passHref
+            legacyBehavior
+          >
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                pathname.startsWith("/plan") && "bg-accent text-accent-foreground"
+              )}
+            >
+              Plan
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

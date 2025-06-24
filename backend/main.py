@@ -5,6 +5,7 @@ import api.messages as messages
 import api.trips_information as trips_information
 import api.plans as plans
 import api.auth as auth
+import api.google_photo as photo
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Travel Planner App")
@@ -22,6 +23,7 @@ app.include_router(trips.router)
 app.include_router(messages.router)
 app.include_router(trips_information.router)
 app.include_router(plans.router)
+app.include_router(photo.router)
 app.include_router(auth.router)
 
 if __name__ == "__main__":

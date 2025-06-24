@@ -43,8 +43,6 @@ export function LoginForm({
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                //   type="email"
-                //   placeholder="m@example.com"
                   value={email}
                   onChange={(e) => onEmailChange(e.target.value)}
                   required

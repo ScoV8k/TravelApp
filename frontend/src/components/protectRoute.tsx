@@ -17,7 +17,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   if (!authorized) {
-    return null; // lub <Loading />
+    return null;
   }
 
   return <>{children}</>;

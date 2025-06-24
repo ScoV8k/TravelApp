@@ -1,9 +1,6 @@
 // app/api/google-places/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// Użyj zmiennej środowiskowej bez prefixu NEXT_PUBLIC_, jeśli klucz ma być używany tylko po stronie serwera.
-// Jeśli jednak ten sam klucz jest używany do Place Photo URL po stronie klienta,
-// możesz pozostać przy NEXT_PUBLIC_GOOGLE_PLACES_API_KEY i odpowiednio go zabezpieczyć w Google Cloud Console.
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
 export async function POST(req: NextRequest) {
@@ -27,7 +24,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: upstreamErrorMessage }, { status: 400 });
     }
 
-    // console.log(`Proxying request to Google Places API: ${apiUrl}`); // Do debugowania
     const googleResponse = await fetch(apiUrl);
     const data = await googleResponse.json();
 

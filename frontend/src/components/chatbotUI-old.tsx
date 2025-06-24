@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react";
-// import "./style.css";
 
 export const ChatBotUi = () => {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);

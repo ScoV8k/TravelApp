@@ -1,6 +1,6 @@
-def get_empty_plan():
+def get_empty_travel_information():
     return {
-        "destination_country": None,
+        "destination_countries": [],
         "destination_cities": [],
         "start_date": None,
         "end_date": None,
@@ -17,23 +17,21 @@ def get_empty_plan():
                 "city": None,
                 "check_in": None,
                 "check_out": None,
-                "chosen_hotel": None,
-                "suggested_hotels": []
+                "chosen_hotel": None
             }
         ],
         "places_to_visit": [
             {
                 "city": None,
-                "suggested_places": [],
-                "user_selected": []
-            }
-        ],
-        "activities": [
-            {
-                "type": None,
-                "description": None,
-                "location": None,
-                "suggested_options": []
+                "duration_days": None,
+                "activities": [
+                    {
+                    "name": None,
+                    "type": None,
+                    "description": None,
+                    "location": None
+                    }
+                ],
             }
         ],
         "budget": {
@@ -77,29 +75,22 @@ def get_empty_plan2():
         {
           "time": None,
           "title": None,
+          "location_name": None,
           "description": None,
-          "location": {
-            "name": None,
-            "lat": None,
-            "lng": None
-          },
           "type": None,
-          "map_link": None
+          "tags": None
         }
       ],
       "notes": None
     }
   ],
-  "map_summary": {
-    "locations": [
-      {
+  "general_notes": [],
+  "emergency_contacts": [
+    {
         "name": None,
-        "lat": None,
-        "lng": None,
-        "day": None,
-        "type": None
-      }
-    ]
-  },
-  "general_notes": []
+        "phone": None,
+        "type": None  # np. "embassy", "local police", "travel agent"
+    }
+]
+
 }"""

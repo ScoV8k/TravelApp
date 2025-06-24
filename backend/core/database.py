@@ -14,13 +14,3 @@ trips_col = db["trips"]
 messages_col = db["messages"]
 plans_col = db["plans"]
 trips_information_col = db["trips-information"]
-
-# async def insert_test_message():
-#     message = {
-#         "trip_id": "gruzja2025",
-#         "user_message": "Chcę pojechać do Batumi",
-#         "llm_response": "Świetnie! To piękne miasto nad Morzem Czarnym.",
-#         "timestamp": datetime.now()
-#     }
-#     result = await messages_col.insert_one(message)
-#     print("Wstawiono wiadomość z ID:", result.inserted_id)

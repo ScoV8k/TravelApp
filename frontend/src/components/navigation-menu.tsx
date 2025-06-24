@@ -18,8 +18,6 @@ import { useTrip } from "@/app/context/TripContext"
 export function NavigationMenuDemo() {
   const pathname = usePathname()
   const { tripName, tripId: contextTripId } = useTrip()
-
-  // fallback: jeśli nie mamy tripId w kontekście, wyciągamy je z pathname
   const tripIdMatch = pathname.match(/(?:\/trip|\/travelplan|\/checklists)\/([^/]+)/)
   const tripId = contextTripId || (tripIdMatch ? tripIdMatch[1] : null)
   
@@ -27,7 +25,6 @@ export function NavigationMenuDemo() {
   return (
     <NavigationMenu>
       <NavigationMenuList>
-        {/* Chat */}
         <NavigationMenuItem>
           <Link
             href={tripId ? `/trip/${tripId}` : "/"}
@@ -48,7 +45,6 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Travel Information*/}
         <NavigationMenuItem>
           <Link
             href={tripId ? `/travelplan/${tripId}` : "/travelplan"}
@@ -66,7 +62,6 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Checklists */}
         <NavigationMenuItem>
           <Link
             href={tripId ? `/checklists/${tripId}` : "/checklists"}
@@ -84,7 +79,6 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-          {/* Travel Plan */}
         <NavigationMenuItem>
           <Link
             href={tripId ? `/plan/${tripId}` : "/plan"}
@@ -102,7 +96,6 @@ export function NavigationMenuDemo() {
           </Link>
         </NavigationMenuItem>
 
-        {/* Nazwa tripa */}
         {tripId && tripName && (
           <NavigationMenuItem>
             <span

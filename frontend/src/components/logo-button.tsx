@@ -9,7 +9,6 @@ export function LogoButton() {
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" className="flex items-center">
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary " >
-          {/* className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground" */}
             <img
               src="/logo.png"
               alt="Logo"

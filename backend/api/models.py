@@ -34,6 +34,7 @@ class UserBase(BaseModel):
     name: str
     email: str
     password: str
+    about: Optional[str] = Field(None, max_length=400)
 
 class UserDB(UserBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -44,6 +45,9 @@ class UserDB(UserBase):
     class Config:
         populate_by_name = True
         json_encoders = {ObjectId: str}
+
+class AboutMeUpdate(BaseModel):
+    about: str = Field(..., max_length=400)
 
 # TRIPS
 class TripBase(BaseModel):
@@ -95,23 +99,13 @@ class MessageDB(MessageBase):
         json_encoders = {ObjectId: str}
 
 
-
-# class ChecklistItem(BaseModel):
-#     name: str
-#     checked: bool = False
-
-# class ChecklistItem(BaseModel):
-#     id: int
-#     name: str
-#     checked: bool = False
-    
-
 class ChecklistItem(BaseModel):
     id: int
     name: str
     checked: bool = False
 
 class Checklist(BaseModel):
+    id: int
     name: str
     items: List[ChecklistItem] = []
 
@@ -129,7 +123,7 @@ class TripInformationBase(BaseModel):
 class TripInformationDB(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     trip_id: PyObjectId
-    data: dict  # Twój pełny plan jako JSON
+    data: dict
     updated_at: datetime
     checklist: List[Checklist]
 
@@ -151,7 +145,7 @@ class PlanBase(BaseModel):
 class PlanDB(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     trip_id: PyObjectId
-    data: dict  # Twój pełny plan jako JSON
+    data: dict
     updated_at: datetime
 
     class Config:

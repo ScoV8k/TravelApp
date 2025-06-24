@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from api.models import UserBase, UserDB, PyObjectId
-from typing import List
+from api.models import UserBase, UserDB, PyObjectId, AboutMeUpdate
 from core.security import hash_password
-import sys
-import os
 from core.database import users_col
+
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post("/", response_model=UserDB)
@@ -46,3 +44,20 @@ async def get_user_by_name(user_name: str):
     
     user["_id"] = str(user["_id"])
     return user
+
+@router.put("/{user_id}/about", status_code=204)
+async def update_about_me(user_id: str, payload: AboutMeUpdate):
+    try:
+        object_id = PyObjectId(user_id)
+        result = await users_col.update_one(
+            {"_id": object_id},
+            {"$set": {"about": payload.about}}
+        )
+
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return 
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid ID format or other error: {str(e)}")

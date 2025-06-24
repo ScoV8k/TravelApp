@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
 from core.database import users_col
-from api.models import UserDB, PyObjectId 
+from api.models import PyObjectId 
 from core.security import verify_password
 
 router = APIRouter(prefix="/auth", tags=["Auth"])

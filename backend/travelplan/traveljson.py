@@ -89,8 +89,7 @@ def get_empty_plan2():
     {
         "name": None,
         "phone": None,
-        "type": None  # np. "embassy", "local police", "travel agent"
+        "type": None  # np. "embassy" (POLISH), "local police", "travel agent" 
     }
 ]
-
 }"""

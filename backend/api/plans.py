@@ -50,6 +50,21 @@ async def update_plan(plan_id: str, plan: PlanBase):
 
     return updated_plan
 
+@router.get("/all-names")
+async def get_all_plan_names():
+    try:
+        cursor = plans_col.find({}, {"trip_id": 1, "data.trip_name": 1})
+        plans = []
+        async for plan in cursor:
+            plans.append({
+                "id": str(plan["trip_id"]),  # ← poprawka tu
+                "trip_name": plan.get("data", {}).get("trip_name", "")
+            })
+        return plans
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching plan names: {str(e)}")
+
+
 @router.get("/{trip_id}", response_model=PlanDB)
 async def get_plan_by_trip_id(trip_id: str):
     try:

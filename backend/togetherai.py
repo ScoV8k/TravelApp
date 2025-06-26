@@ -7,7 +7,7 @@ from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from datetime import datetime
 from bson import ObjectId
-from core.database import plans_col, trips_col
+from core.database import plans_col, trips_col, users_col
 from api.models import PlanDB
 import json
 import os
@@ -232,13 +232,37 @@ async def try_parse_json(response_text: str, retries: int = 2):
 
 
 
+# @app.post("/generate-plan/{trip_id}", response_model=PlanDB)
+# async def generate_and_save_plan(trip_id: str):
+#     plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
+#     if not plan_doc:
+#         raise HTTPException(status_code=404, detail="Plan source data not found")
+
+#     travel_information = plan_doc.get("data", {})
+
 @app.post("/generate-plan/{trip_id}", response_model=PlanDB)
 async def generate_and_save_plan(trip_id: str):
-    plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
-    if not plan_doc:
+    trip_main_doc = await trips_col.find_one({"_id": ObjectId(trip_id)})
+    if not trip_main_doc:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    user_id = trip_main_doc.get("user_id")
+
+    user_about_info = ""
+    if user_id:
+        try:
+            user_doc = await users_col.find_one({"_id": ObjectId(user_id)})
+            if user_doc and "about" in user_doc:
+                user_about_info = user_doc["about"]
+                print(f"🟢 Found user preferences for user_id: {user_id}")
+        except Exception as e:
+            print(f"⚠️ Could not fetch user info for user_id: {user_id}. Error: {e}")
+
+    plan_info_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
+    if not plan_info_doc:
         raise HTTPException(status_code=404, detail="Plan source data not found")
 
-    travel_information = plan_doc.get("data", {})
+    travel_information = plan_info_doc.get("data", {})
 
     raw_prompt = f"""
 Generate a short travel plan based on the data from TRAVEL INFORMATION.
@@ -253,6 +277,9 @@ Fill in the plan in JSON. If any data is missing – add your own interesting su
 
 TRAVEL INFORMATION:
 {json.dumps(travel_information, indent=2)}
+
+INFORMATION FROM USER:
+{user_about_info}
 
 JSON:
 {json2_skeleton}

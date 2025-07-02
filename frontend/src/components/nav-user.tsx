@@ -100,7 +100,7 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
                 <DropdownMenuItem>
@@ -117,7 +117,7 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator /> */}
 
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />

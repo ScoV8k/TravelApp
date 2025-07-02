@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body
 from api.models import TripBase, TripDB, PyObjectId
 from typing import List
-from core.database import trips_col, plans_col
+from core.database import trips_col, plans_col, trips_information_col
 from travelplan.traveljson import get_empty_travel_information
 
 
@@ -166,3 +166,33 @@ async def update_trip_name(trip_id: str, data: dict = Body(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating trip: {str(e)}")
+
+
+
+@router.delete("/{trip_id}")
+async def delete_trip(trip_id: str):
+    """
+    Usuń trip o danym ID wraz z powiązanymi dokumentami:
+    - trips
+    - trips_information_col
+    - plans_col
+    """
+    try:
+        object_id = PyObjectId(trip_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid ID format: {e}")
+
+    # najpierw sprawdź czy istnieje
+    existing = await trips_col.find_one({"_id": object_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Trip not found")
+
+    # usuń główny dokument
+    await trips_col.delete_one({"_id": object_id})
+    # usuń powiązaną informację
+    await trips_information_col.delete_many({"trip_id": object_id})
+    # usuń powiązany plan
+    await plans_col.delete_many({"trip_id": object_id})
+
+    # zwracamy 204 No Content
+    return None

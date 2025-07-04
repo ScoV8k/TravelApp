@@ -140,7 +140,6 @@ JSON:
 async def generate_message_and_update_plan(req: Demo, background_tasks: BackgroundTasks):
     # bot_response = await chat_chain.arun(message=req.user_message)
     res = await chat_chain.ainvoke({"input": req.user_message})
-    print(res)
     bot_response = res["output"]
     background_tasks.add_task(update_plan_in_background, req.trip_id, req.user_message, req.last_messages)
     print(bot_response)

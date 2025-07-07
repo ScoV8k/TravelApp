@@ -36,15 +36,26 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [messages])
+  }, [messages, isSending])
 
   const sendMessage = async () => {
     if (!input.trim() || isSending) return
+    
+    const currentInput = input
+    setInput("")
+    
+    const timestamp = new Date().toISOString()
+    const userMessage: Message = {
+      _id: `user-${timestamp}`, 
+      trip_id: activeTripId,
+      text: currentInput,
+      isUser: true,
+      timestamp,
+    }
+    setMessages((prev) => [...prev, userMessage])
     setIsSending(true)
 
     let currentTripId = activeTripId
-    const currentInput = input
-    setInput("")
 
     try {
       if (!currentTripId) {
@@ -67,48 +78,42 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         const tripData = await tripRes.json()
         currentTripId = tripData._id
         setActiveTripId(currentTripId)
-      }
 
-      const timestamp = new Date().toISOString()
-      const userMessage: Message = {
-        trip_id: currentTripId,
-        text: currentInput,
-        isUser: true,
-        timestamp,
+        setMessages(prev => prev.map(msg => msg._id === userMessage._id ? {...msg, trip_id: currentTripId} : msg));
       }
-      setMessages((prev) => [...prev, userMessage])
+      
+      const messageToSendToDb = { ...userMessage, trip_id: currentTripId, _id: undefined };
 
       await fetch(`http://localhost:8000/messages/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userMessage),
+        body: JSON.stringify(messageToSendToDb),
       })
 
-
       const lastMessages = [...messages, userMessage]
-      .slice(-3)
-      .map((msg) => ({
-        text: msg.text,
-        isUser: msg.isUser,
-        timestamp: msg.timestamp,
-      }))
+        .slice(-3)
+        .map((msg) => ({
+          text: msg.text,
+          isUser: msg.isUser,
+          timestamp: msg.timestamp,
+        }))
 
-    const res = await fetch(
-      "http://localhost:8001/generate-message-and-update-plan/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          trip_id: currentTripId,
-          user_message: currentInput,
-          last_messages: lastMessages,
-        }),
-      }
-    )
+      const res = await fetch(
+        "http://localhost:8001/generate-message-and-update-plan/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trip_id: currentTripId,
+            user_message: currentInput,
+            last_messages: lastMessages,
+          }),
+        }
+      )
       if (!res.ok) {
         const errorText = await res.text()
         console.error(
-          "❌ Błąd w /generate-message-and-update-plan/:",
+          "Błąd w /generate-message-and-update-plan/:",
           res.status,
           errorText
         )
@@ -122,13 +127,13 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         isUser: false,
         timestamp: new Date().toISOString(),
       }
-
+      
       await fetch(`http://localhost:8000/messages/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(botMessage),
       })
-
+      
       setMessages((prev) => [...prev, botMessage])
 
       console.log("✅ Plan updated:", data.updated_plan)
@@ -137,7 +142,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
       console.error("Błąd przy wysyłaniu wiadomości:", error)
       setInput(currentInput)
       setMessages((prev) =>
-        prev.filter((msg) => msg.text !== currentInput || !msg.isUser)
+        prev.filter((msg) => msg._id !== userMessage._id)
       )
     } finally {
       setIsSending(false)
@@ -148,7 +153,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     <div className="flex flex-col w-full h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto w-full px-6 py-4">
         <div className="max-w-3xl mx-auto space-y-4 h-full flex flex-col">
-          {messages.length === 0 ? (
+          {messages.length === 0 && !isSending ? (
             <div className="flex flex-1 items-center justify-center">
               <h1 className="text-3xl font-semibold text-muted-foreground text-center">
                 Start planning your trip ✈️
@@ -172,6 +177,17 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
                   {msg.text}
                 </div>
               ))}
+              
+              {isSending && (
+                <div className="w-full break-words text-foreground flex items-center gap-2">
+                   <div className="flex items-center space-x-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
+                      <span className="block w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                      <span className="block w-2 h-2 bg-gray-500 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                      <span className="block w-2 h-2 bg-gray-500 rounded-full animate-pulse"></span>
+                    </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </>
           )}

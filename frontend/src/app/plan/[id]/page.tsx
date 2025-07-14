@@ -633,7 +633,7 @@ export default function PlanPage() {
                         "Regenerate"
                     )}
                 </button>
-                <div className="w-full flex justify-center mt-4">
+                {/* <div className="w-full flex justify-center mt-4">
                     <button
                         onClick={() => {
                             // Tutaj dodaj funkcję eksportu do PDF
@@ -643,7 +643,7 @@ export default function PlanPage() {
                     >
                         Export Plan to PDF
                     </button>
-                </div>
+                </div> */}
 
 
                 {/* --- SAVE STATUS --- */}

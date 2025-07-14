@@ -136,21 +136,54 @@ JSON:
     return new_plan
 
 
-@app.post("/generate-message-and-update-plan/")
+@app.post("/generate-message-and-update-information/")
 async def generate_message_and_update_plan(req: Demo, background_tasks: BackgroundTasks):
     # bot_response = await chat_chain.arun(message=req.user_message)
-    res = await chat_chain.ainvoke({"input": req.user_message})
-    bot_response = res["output"]
-    background_tasks.add_task(update_plan_in_background, req.trip_id, req.user_message, req.last_messages)
-    print(bot_response)
-    return {"trip_id": req.trip_id, "bot_response": bot_response}
+
+    plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(req.trip_id)})
 
 
-async def update_plan_in_background(trip_id: str, user_message: str, last_messages: List[Dict]):
-    plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
-    if not plan_doc:
-        return
+    res = await chat_chain.ainvoke({"input": req.user_message, "trip_gathered_information": plan_doc})
+    bot_response_text = res["output"]
+    print(res)
 
+
+
+    booking_link = None
+    if "intermediate_steps" in res:
+        for action, observation in res["intermediate_steps"]:
+            if action.tool == "flight_searcher":
+                try:
+                    flight_data = json.loads(observation)
+                    if isinstance(flight_data, list) and len(flight_data) > 0:
+                        booking_link = flight_data[0].get("booking_link")
+                        break
+                except (json.JSONDecodeError, IndexError, KeyError) as e:
+                    print(f"⚠️  Could not extract booking link from tool observation: {e}")
+
+    print(f"✅ Bot response: {bot_response_text}")
+    print(f"🔗 Captured link: {booking_link}")
+
+    background_tasks.add_task(update_plan_in_background, req.trip_id, req.user_message, req.last_messages, plan_doc)
+    # print(bot_response)
+
+
+    # return {"trip_id": req.trip_id, "bot_response": bot_response}
+
+    return {
+        "trip_id": req.trip_id,
+        "bot_response": {
+            "text": bot_response_text,
+            "link": booking_link
+        }
+    }
+
+# async def update_plan_in_background(trip_id: str, user_message: str, last_messages: List[Dict]):
+
+    # plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
+    # if not plan_doc:
+    #     return
+async def update_plan_in_background(trip_id: str, user_message: str, last_messages: List[Dict], plan_doc: dict):
     current_plan = plan_doc.get("data", {})
     plan_json_text = await information_update_chain.arun(
         last_user_message=user_message,
@@ -172,6 +205,7 @@ async def update_plan_in_background(trip_id: str, user_message: str, last_messag
     )
 
     print(f"✅ Background plan update done for trip_id: {trip_id}")
+    print(current_plan)
 
 
 if __name__ == "__main__":

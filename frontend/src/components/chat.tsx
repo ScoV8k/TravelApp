@@ -9,6 +9,7 @@ type Message = {
   _id?: string
   trip_id?: string
   text: string
+  link?: string
   isUser: boolean
   timestamp: string
 }
@@ -99,7 +100,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         }))
 
       const res = await fetch(
-        "http://localhost:8001/generate-message-and-update-plan/",
+        "http://localhost:8001/generate-message-and-update-information/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -113,7 +114,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
       if (!res.ok) {
         const errorText = await res.text()
         console.error(
-          "Błąd w /generate-message-and-update-plan/:",
+          "Błąd w /generate-message-and-update-information/:",
           res.status,
           errorText
         )
@@ -123,10 +124,13 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
       const data = await res.json()
       const botMessage: Message = {
         trip_id: currentTripId,
-        text: data.bot_response,
+        text: data.bot_response.text,
         isUser: false,
+        link: data.bot_response.link,
         timestamp: new Date().toISOString(),
       }
+
+      console.log(botMessage)
       
       await fetch(`http://localhost:8000/messages/`, {
         method: "POST",
@@ -175,6 +179,18 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
                   }}
                 >
                   {msg.text}
+                  
+                  {msg.link && !msg.isUser && (
+            <div className="mt-2">
+                <Button
+                    onClick={() => window.open(msg.link, "_blank")}
+                    size="sm"
+                    className="bg-gray-500 hover:bg-gray-700 text-white"
+                >
+                    Book your flight ✈️
+                </Button>
+            </div>
+        )}
                 </div>
               ))}
               

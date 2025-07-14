@@ -34,10 +34,11 @@ from langchain.agents import create_react_agent
 from chains.tools.weather import current_weather_tool, forecast_weather_tool
 from chains.tools.flights import flight_searcher_tool
 from chains.tools.today import today_tool
+from chains.tools.hotels import hotel_searcher_tool
 
 load_dotenv()
 
-tools = [current_weather_tool, forecast_weather_tool, flight_searcher_tool, today_tool]
+tools = [current_weather_tool, forecast_weather_tool, flight_searcher_tool, today_tool, hotel_searcher_tool]
 
 chat_llm = ChatTogether(
     model="deepseek-ai/DeepSeek-V3",
@@ -47,7 +48,8 @@ chat_llm = ChatTogether(
 
 memory = ConversationBufferMemory(
     memory_key="chat_history",
-    return_messages=True
+    return_messages=True,
+    input_key="input"
 )
 
 
@@ -55,6 +57,9 @@ template = """
 You are a friendly travel assistant. Your task is to help the user plan a trip by asking one question at a time. Ask specific, small questions to gradually gather details. Do NOT propose or generate a full trip plan. Only ask questions like: 'Where do you want to go?', 'What dates are you planning?', 'What kind of places do you like?', 'What’s your budget?', etc.
 
 When you need to find specific, real-time information like weather, use the available tools.
+
+CURRENTLY KNOWN TRIP INFORMATION:
+{trip_gathered_information}
 
 TOOLS:
 ------
@@ -90,7 +95,7 @@ New input: {input}
 
 
 prompt = PromptTemplate(
-    input_variables=["input", "tools", "tool_names", "chat_history", "agent_scratchpad"],
+    input_variables=["input", "tools", "tool_names", "chat_history", "agent_scratchpad", "trip_gathered_information"],
     template=template
 )
 
@@ -106,9 +111,6 @@ chat_chain = AgentExecutor(
     memory=memory,
     verbose=True,
     handle_parsing_errors=True,
-    max_iterations=5
+    max_iterations=5,
+    return_intermediate_steps=True
 )
-
-
-
-# print(search_flights("francja"))

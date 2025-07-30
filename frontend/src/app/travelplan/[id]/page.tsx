@@ -35,9 +35,9 @@ interface Flight {
   link: string | null
   price: string | null
   departure_outbound_from: string | null
-  departure_outbound_date: string | null
+  departure_outbound_time: string | null
   departure_inbound_from: string | null
-  departure_inbound_date: string | null
+  departure_inbound_time: string | null
 }
 
 
@@ -183,13 +183,24 @@ export default function PlanPage() {
 
   const travelInfo = plan?.data
 
+  function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleString("pl-PL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6">
       <h1 className="text-3xl font-bold mb-8">Your Trip Plan</h1>
 
       {travelInfo && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* --- Kolumna boczna --- */}
           <aside className="lg:col-span-1 space-y-8">
             <Card>
               <CardHeader>
@@ -236,18 +247,18 @@ export default function PlanPage() {
                     {travelInfo.flight.departure_outbound_from && (
                       <p><strong>From:</strong> {travelInfo.flight.departure_outbound_from}</p>
                     )}
-                    {travelInfo.flight.departure_outbound_date && (
-                      <p><strong>Date:</strong> {travelInfo.flight.departure_outbound_date}</p>
+                    {travelInfo.flight.departure_outbound_time && (
+                      <p><strong>Date:</strong> {formatDate(travelInfo.flight.departure_outbound_time)}</p>
                     )}
                   </div>
-                  {(travelInfo.flight.departure_inbound_from || travelInfo.flight.departure_inbound_date) && (
+                  {(travelInfo.flight.departure_inbound_from || travelInfo.flight.departure_inbound_time) && (
                     <div className="space-y-1 border-t pt-3 mt-3">
                       <p className="font-semibold">Return</p>
                       {travelInfo.flight.departure_inbound_from && (
                         <p><strong>From:</strong> {travelInfo.flight.departure_inbound_from}</p>
                       )}
-                      {travelInfo.flight.departure_inbound_date && (
-                        <p><strong>Date:</strong> {travelInfo.flight.departure_inbound_date}</p>
+                      {travelInfo.flight.departure_inbound_time && (
+                        <p><strong>Date:</strong> {formatDate(travelInfo.flight.departure_inbound_time)}</p>
                       )}
                     </div>
                   )}

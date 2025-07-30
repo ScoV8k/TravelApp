@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 export function useAuthRedirect() {
   const router = useRouter();
-  const pathname = usePathname(); // Pobierz ścieżkę wewnątrz hooka
+  const pathname = usePathname();
 
   useEffect(() => {
     const publicPaths = ["/login", "/register"];

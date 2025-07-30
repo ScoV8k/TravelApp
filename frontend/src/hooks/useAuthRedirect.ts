@@ -1,14 +1,21 @@
 // hooks/useAuthRedirect.ts
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export function useAuthRedirect() {
-  const router = useRouter()
+  const router = useRouter();
+  const pathname = usePathname(); // Pobierz ścieżkę wewnątrz hooka
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    if (!token) {
-      router.push("/login")
+    const publicPaths = ["/login", "/register"];
+
+    // Sprawdzamy, czy bieżąca ścieżka jest publiczna
+    const isPublicPath = publicPaths.includes(pathname);
+
+    const token = localStorage.getItem("token");
+
+    if (!token && !isPublicPath) {
+      router.push("/login");
     }
-  }, [router])
+  }, [pathname, router]);
 }

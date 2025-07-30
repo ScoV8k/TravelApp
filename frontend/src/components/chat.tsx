@@ -4,15 +4,26 @@ import { useEffect, useState, useRef } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+
+type Flight = {
+  link: string
+  price: string
+  departure_outound_date: string
+  departure_outound_from: string
+  departure_inbound_from: string
+  departure_inbound_date: string
+}
 
 type Message = {
   _id?: string
   trip_id?: string
   text: string
-  link?: string
+  flight?: Flight
   isUser: boolean
   timestamp: string
 }
+
 
 type ChatProps = {
   initialMessages?: Message[]
@@ -24,6 +35,8 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
   const [input, setInput] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [activeTripId, setActiveTripId] = useState<string | undefined>(tripId)
+
+  const [addedFlights, setAddedFlights] = useState<Record<string, boolean>>({})
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -39,6 +52,40 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     }
   }, [messages, isSending])
 
+
+  const addFlightToInfo = async (flight: Flight, msg: Message) => {
+      console.log("Attempting to add flight. Message data:", {
+          id: msg._id,
+          trip_id: msg.trip_id,
+          flight: flight
+      });
+
+      if (!msg._id || !msg.trip_id) {
+          console.error("Action stopped: Missing _id or trip_id on the message object.");
+          return
+      }
+
+      setAddedFlights(prev => ({ ...prev, [msg._id!]: true }))
+
+    try {
+      const res = await fetch(`http://localhost:8000/information/trip/${msg.trip_id}/flight`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(flight),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to add flight to information")
+      }
+      
+      const updatedInfo = await res.json();
+      console.log("✅ Flight added successfully:", updatedInfo)
+    } catch (error) {
+      console.error("Error adding flight:", error)
+      setAddedFlights(prev => ({ ...prev, [msg._id!]: false }))
+    }
+  }
+  
   const sendMessage = async () => {
     if (!input.trim() || isSending) return
     
@@ -55,6 +102,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
     }
     setMessages((prev) => [...prev, userMessage])
     setIsSending(true)
+
 
     let currentTripId = activeTripId
 
@@ -123,15 +171,18 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
 
       const data = await res.json()
       const botMessage: Message = {
+        _id: `bot-${new Date().toISOString()}`,
         trip_id: currentTripId,
         text: data.bot_response.text,
         isUser: false,
-        link: data.bot_response.link,
+        flight: data.bot_response.flight,
         timestamp: new Date().toISOString(),
       }
 
       console.log(botMessage)
       
+      // const { _id, ...botMessageForDb } = botMessage
+
       await fetch(`http://localhost:8000/messages/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -178,17 +229,26 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {msg.text}
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
                   
-                  {msg.link && !msg.isUser && (
+                  
+                  {msg.flight?.link && !msg.isUser && (
             <div className="mt-2">
                 <Button
-                    onClick={() => window.open(msg.link, "_blank")}
+                    onClick={() => window.open(msg.flight?.link, "_blank")}
                     size="sm"
                     className="bg-gray-500 hover:bg-gray-700 text-white"
                 >
                     Book your flight ✈️
                 </Button>
+                <Button
+                            onClick={() => addFlightToInfo(msg.flight!, msg)}
+                            disabled={addedFlights[msg._id!]}
+                            size="sm"
+                            variant="outline"
+                        >
+                            {addedFlights[msg._id!] ? "Added! ✅" : "Add to information"}
+                        </Button>
             </div>
         )}
                 </div>

@@ -3,7 +3,7 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 information_llm = ChatTogether(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+    model="deepseek-ai/DeepSeek-V3",
     temperature=0.7,
     max_tokens=512
 )
@@ -19,6 +19,7 @@ Use the conversation history **only for context** if needed, but do not use assi
 - Make only minimal and necessary edits.
 - If information is missing, leave it empty.
 - Output must be a valid, complete JSON.
+- REMEMBER YOU DONT ADD AND DONT EDIT FLIGHTS
 
 Last user answer:
 {last_user_message}

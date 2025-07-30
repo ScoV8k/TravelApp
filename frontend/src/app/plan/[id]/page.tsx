@@ -365,7 +365,7 @@ export default function PlanPage() {
                 <div className="bg-white p-6 md:p-10 rounded-xl shadow-2xl max-w-md w-full">
                     <PlayCircle className="w-12 h-12 text-blue-500 mx-auto mb-4" />
                     <h1 className="text-2xl md:text-3xl font-semibold text-slate-700 mb-3">
-                        Your trip plan is waiting!
+                        Generate your trip plan!
                     </h1>
                     <p className="text-slate-500 mb-5 text-sm">
                         Click the button below to start generating your schedule.

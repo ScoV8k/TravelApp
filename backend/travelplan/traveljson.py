@@ -44,6 +44,14 @@ def get_empty_travel_information():
             },
             "currency": None
         },
+        "flight": {
+            "link": None,
+            "price": None,
+            "departure_outbound_from": None,
+            "departure_outbound_time": None,
+            "departure_inbound_from": None,
+            "departure_inbound_time": None,
+        },
         "additional_notes": [
             {
                 "text": None

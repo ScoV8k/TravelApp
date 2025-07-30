@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, } from "react"
 import { useParams } from "next/navigation"
 import {
   MapPin,
@@ -10,7 +10,7 @@ import {
   Landmark,
   Wallet,
   StickyNote,
-  Activity,
+  Plane,
 } from "lucide-react"
 import {
   Accordion,
@@ -28,6 +28,18 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+
+
+interface Flight {
+  link: string | null
+  price: string | null
+  departure_outbound_from: string | null
+  departure_outbound_date: string | null
+  departure_inbound_from: string | null
+  departure_inbound_date: string | null
+}
+
 
 interface TravelInformation {
   destination_countries: string[]
@@ -66,6 +78,7 @@ interface TravelInformation {
     }
     currency: string | null
   }
+  flight: Flight
   additional_notes: {
     text: string | null
   }[]
@@ -136,6 +149,7 @@ export default function PlanPage() {
         }
         const data = await res.json()
         setPlan(data)
+        console.log(data)
       } catch (err: any) {
         console.error(err)
         setError(err.message || "An unknown error occurred.")
@@ -208,6 +222,52 @@ export default function PlanPage() {
                 )}
               </CardContent>
             </Card>
+            
+            {travelInfo.flight && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plane className="w-5 h-5" />
+                    Flight Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="space-y-1">
+                    {travelInfo.flight.departure_outbound_from && (
+                      <p><strong>From:</strong> {travelInfo.flight.departure_outbound_from}</p>
+                    )}
+                    {travelInfo.flight.departure_outbound_date && (
+                      <p><strong>Date:</strong> {travelInfo.flight.departure_outbound_date}</p>
+                    )}
+                  </div>
+                  {(travelInfo.flight.departure_inbound_from || travelInfo.flight.departure_inbound_date) && (
+                    <div className="space-y-1 border-t pt-3 mt-3">
+                      <p className="font-semibold">Return</p>
+                      {travelInfo.flight.departure_inbound_from && (
+                        <p><strong>From:</strong> {travelInfo.flight.departure_inbound_from}</p>
+                      )}
+                      {travelInfo.flight.departure_inbound_date && (
+                        <p><strong>Date:</strong> {travelInfo.flight.departure_inbound_date}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="border-t pt-3 mt-3 space-y-2">
+                    {travelInfo.flight.price && (
+                      <p><strong>Total Price:</strong> {travelInfo.flight.price}</p>
+                    )}
+                    {travelInfo.flight.link && (
+                      <Button asChild size="sm" className="w-full">
+                        <a href={travelInfo.flight.link} target="_blank" rel="noopener noreferrer">
+                          View Flight ✈️
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
 
             {travelInfo.travelers_details && travelInfo.travelers_details.length > 0 && (
             <Card>

@@ -4,8 +4,8 @@ from langchain.prompts import PromptTemplate
 
 information_llm = ChatTogether(
     model="deepseek-ai/DeepSeek-V3",
-    temperature=0.7,
-    max_tokens=512
+    temperature=0.8,
+    max_tokens=2048
 )
 
 information_llm_prompt = PromptTemplate(
@@ -19,7 +19,10 @@ Use the conversation history **only for context** if needed, but do not use assi
 - Make only minimal and necessary edits.
 - If information is missing, leave it empty.
 - Output must be a valid, complete JSON.
-- REMEMBER YOU DONT ADD AND DONT EDIT FLIGHTS
+- Don't add or edit flights, but also don't delete it. Different system is doing it for you so don't mind this part of json.
+- If you add travelers remember about adding one more called "You" (me, who is talking with you)
+- YOU CAN'T ADD ACTIVITIES WITH NULL NAME!!!
+- In additional notes add only important information about user preferences about the trip that you can't write in json (for example: User has allergy to penuts so cant go to penut restaurant)
 
 Last user answer:
 {last_user_message}

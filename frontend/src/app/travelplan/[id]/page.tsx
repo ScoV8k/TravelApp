@@ -185,7 +185,7 @@ export default function PlanPage() {
 
   function formatDate(dateString: string) {
   const date = new Date(dateString);
-  return date.toLocaleString("pl-PL", {
+  return date.toLocaleString("en-EN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -197,7 +197,7 @@ export default function PlanPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6">
-      <h1 className="text-3xl font-bold mb-8">Your Trip Plan</h1>
+      <h1 className="text-3xl font-bold mb-8">Your Travel Information</h1>
 
       {travelInfo && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -349,7 +349,7 @@ export default function PlanPage() {
                       <div key={idx} className="p-3 bg-muted/50 rounded-lg">
                         <div className="flex justify-between font-semibold">
                           <span>{a.city}</span>
-                          <span className="text-sm font-normal text-muted-foreground">{a.check_in} to {a.check_out}</span>
+                          {/* <span className="text-sm font-normal text-muted-foreground">{a.check_in} to {a.check_out}</span> */}
                         </div>
                         {a.chosen_hotel && <p className="text-sm mt-1">✓ Chosen: {a.chosen_hotel}</p>}
                       </div>

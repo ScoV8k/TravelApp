@@ -297,7 +297,7 @@ export default function PlanPage() {
 
     try {
         const fullResponse = await fetchWithRetries(
-            `http://localhost:8001/generate-plan/${tripId}`,
+            `http://localhost:8000/generate-plan/${tripId}`,
             { method: "POST" }
         );
 

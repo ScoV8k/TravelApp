@@ -148,7 +148,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         }))
 
       const res = await fetch(
-        "http://localhost:8001/generate-message-and-update-information/",
+        "http://localhost:8000/generate-message-and-update-information/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -6,19 +6,20 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { NavigationMenuDemo } from "@/components/navigation-menu";
 import { usePathname } from "next/navigation";
 import { TripProvider } from "./context/TripContext";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect"
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  useAuthRedirect()
+  useAuthRedirect();
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
   return (
-    <html lang="en">
+    <html lang="pl">
       <body className="overflow-hidden">
         <SidebarProvider>
           <TripProvider>
-            {!isLoginPage && <AppSidebar />}
-            {!isLoginPage ? (
+            {!isAuthPage && <AppSidebar />}
+            {!isAuthPage ? (
               <main className="flex flex-col w-full h-screen">
                 <div className="flex items-center p-4 border-b">
                   <SidebarTrigger />
@@ -35,5 +36,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </SidebarProvider>
       </body>
     </html>
-  )
+  );
 }

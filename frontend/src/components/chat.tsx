@@ -206,11 +206,11 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
 
   return (
     <div className="flex flex-col w-full h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto w-full px-6 py-4">
+      <div className="flex-1 overflow-y-auto w-full px-2 md:px-6 py-2 md:py-4">
         <div className="max-w-3xl mx-auto space-y-4 h-full flex flex-col">
           {messages.length === 0 && !isSending ? (
             <div className="flex flex-1 items-center justify-center">
-              <h1 className="text-3xl font-semibold text-muted-foreground text-center">
+              <h1 className="text-xl md:text-3xl font-semibold text-muted-foreground text-center px-4">
                 Start planning your trip ✈️
               </h1>
             </div>
@@ -221,7 +221,7 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
                   key={msg._id || msg.timestamp + msg.text}
                   className={
                     msg.isUser
-                      ? "ml-auto w-fit max-w-md break-words rounded-lg bg-gray-200 px-4 py-2 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                      ? "ml-auto w-fit max-w-[85%] md:max-w-md break-words rounded-lg bg-gray-200 px-3 md:px-4 py-2 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                       : "w-full break-words text-foreground"
                   }
                   style={{
@@ -270,8 +270,8 @@ export const Chat = ({ initialMessages = [], tripId }: ChatProps) => {
         </div>
       </div>
 
-      <div className="p-4 w-full">
-        <div className="max-w-2xl mx-auto flex items-start gap-x-4 border-t border-border/50 pt-4">
+      <div className="p-2 md:p-4 w-full">
+        <div className="max-w-2xl mx-auto flex items-start gap-x-2 md:gap-x-4 border-t border-border/50 pt-2 md:pt-4">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}

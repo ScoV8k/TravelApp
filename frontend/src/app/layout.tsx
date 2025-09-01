@@ -15,17 +15,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <html lang="pl">
-      <body className="overflow-hidden">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </head>
+      <body className="overflow-hidden md:overflow-hidden">
         <SidebarProvider>
           <TripProvider>
             {!isAuthPage && <AppSidebar />}
             {!isAuthPage ? (
-              <main className="flex flex-col w-full h-screen">
-                <div className="flex items-center p-4 border-b">
+              <main className="flex flex-col w-full h-screen md:h-screen">
+                <div className="flex items-center p-2 md:p-4 border-b">
                   <SidebarTrigger />
                   <NavigationMenuDemo />
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto w-full">
                   {children}
                 </div>
               </main>

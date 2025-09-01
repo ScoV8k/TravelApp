@@ -24,7 +24,7 @@ export function NavigationMenuDemo() {
 
   return (
     <NavigationMenu>
-      <NavigationMenuList>
+      <NavigationMenuList className="flex-wrap md:flex-nowrap">
         <NavigationMenuItem>
           <Link
             href={tripId ? `/trip/${tripId}` : "/"}

@@ -23,6 +23,7 @@ Use the conversation history **only for context** if needed, but do not use assi
 - If you add travelers remember about adding one more called "You" (me, who is talking with you)
 - YOU CAN'T ADD ACTIVITIES WITH NULL NAME!!!
 - In additional notes add only important information about user preferences about the trip that you can't write in json (for example: User has allergy to penuts so cant go to penut restaurant)
+- If there is no hotel chosen, don't add hotel number to the contacts.
 
 Last user answer:
 {last_user_message}

@@ -67,7 +67,6 @@ async def enrich_plan_with_locations(plan_data: dict) -> dict:
                     "photo_reference": enriched["photo_reference"]
                 })
 
-
     return plan_data
 
 

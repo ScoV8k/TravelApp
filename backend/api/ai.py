@@ -67,6 +67,8 @@ Fill in the plan in JSON. If any data is missing – add your own interesting su
 - Make sure EVERY element in a list or object is SEPARATED by a comma (,).
 - DO NOT use a comma after the last element of a list or object.
 - NEWLINE characters inside strings should be written as \\n (double backslash).
+- Attractions MUST be CONCRETE places (e.g. "Louvre Museum", "Central Park", "Restaurant XYZ") and NOT generic activities (like "walk around the city" or "eat dinner").
+
 
 TRAVEL INFORMATION:
 {json.dumps(travel_information, indent=2)}

@@ -3,9 +3,9 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 information_llm = ChatTogether(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-    temperature=0.7,
-    max_tokens=512
+    model="deepseek-ai/DeepSeek-V3",
+    temperature=0.8,
+    max_tokens=2048
 )
 
 information_llm_prompt = PromptTemplate(
@@ -19,6 +19,11 @@ Use the conversation history **only for context** if needed, but do not use assi
 - Make only minimal and necessary edits.
 - If information is missing, leave it empty.
 - Output must be a valid, complete JSON.
+- Don't add or edit flights, but also don't delete it. Different system is doing it for you so don't mind this part of json.
+- If you add travelers remember about adding one more called "You" (me, who is talking with you)
+- YOU CAN'T ADD ACTIVITIES WITH NULL NAME!!!
+- In additional notes add only important information about user preferences about the trip that you can't write in json (for example: User has allergy to penuts so cant go to penut restaurant)
+- If there is no hotel chosen, don't add hotel number to the contacts.
 
 Last user answer:
 {last_user_message}

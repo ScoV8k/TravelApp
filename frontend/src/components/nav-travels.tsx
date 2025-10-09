@@ -80,7 +80,6 @@ export function NavTravels({
   
       if (!res.ok) throw new Error("Zmiana nazwy nie powiodła się")
   
-      // zaktualizuj lokalnie
       setTravels((prev) =>
         prev.map((trip) =>
           trip.id === id ? { ...trip, name: editingValue } : trip

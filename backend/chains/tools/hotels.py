@@ -12,30 +12,27 @@ def Google_Hotels(input_data: str) -> str:
         data = json.loads(input_data)
         city = data.get("city")
         if not city:
-            return json.dumps({"error": "Klucz 'city' jest wymagany w JSON na wejściu."})
+            return json.dumps({"error": "City is needed"})
     except json.JSONDecodeError:
-        return json.dumps({"error": "Niepoprawny format JSON na wejściu. Oczekiwano np. '{\"city\": \"Paris\"}'."})
+        return json.dumps({"error": "Bad JSON format. Good example: '{\"city\": \"Paris\"}'."})
 
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY")
     if not api_key:
         return json.dumps({"error": "Klucz GOOGLE_API_KEY nie jest ustawiony w pliku .env."})
 
-    # Adres URL do Google Places API - Text Search
     url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 
-    # Parametry zapytania
     params = {
-        "query": f"hotele w {city}",
+        "query": f"hotels in {city}",
         "key": api_key,
-        "language": "pl" # Możesz zmienić na 'en' jeśli wolisz wyniki po angielsku
+        "language": "en"
     }
 
     try:
         response = requests.get(url, params=params)
-        response.raise_for_status()  # Sprawdza czy nie ma błędów HTTP (np. 4xx, 5xx)
+        response.raise_for_status()
         results_data = response.json()
 
-        # Sprawdzanie statusu odpowiedzi z API Google
         if results_data["status"] != "OK":
             if results_data["status"] == "ZERO_RESULTS":
                  return json.dumps({"message": f"Nie znaleziono hoteli w mieście: {city}."})
@@ -44,11 +41,11 @@ def Google_Hotels(input_data: str) -> str:
         # Przetwarzanie odpowiedzi, aby była czytelniejsza dla LLM
         simplified_results = []
         # Bierzemy maksymalnie 5 pierwszych wyników
-        for place in results_data.get("results", [])[:5]:
+        for place in results_data.get("results", [])[:4]:
             simplified_results.append({
                 "name": place.get("name"),
                 "address": place.get("formatted_address"),
-                "rating": place.get("rating", "Brak oceny"),
+                "rating": place.get("rating", "No rating"),
                 "total_ratings": place.get("user_ratings_total", 0)
             })
 
@@ -65,6 +62,6 @@ def Google_Hotels(input_data: str) -> str:
 # Definicja narzędzia dla LangChain
 hotel_searcher_tool = Tool(
     name="hotel_searcher",
-    description="Użyj tego narzędzia do wyszukiwania hoteli w określonym mieście. Wejście musi być stringiem JSON z kluczem 'city' (np. {'city': 'Paryż'}). Zwraca listę JSON z propozycjami hoteli, zawierającą ich nazwę, adres i ocenę.",
+    description="Use this tool to search for hotels in a specified city. The input must be a JSON string with the key 'city' (e.g., {'city': 'Paris'}). Returns a JSON list of hotel suggestions, including their name, address, and rating.",
     func=Google_Hotels,
 )

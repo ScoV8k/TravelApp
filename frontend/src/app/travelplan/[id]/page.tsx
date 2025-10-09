@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, } from "react"
 import { useParams } from "next/navigation"
 import {
   MapPin,
@@ -10,7 +10,7 @@ import {
   Landmark,
   Wallet,
   StickyNote,
-  Activity,
+  Plane,
 } from "lucide-react"
 import {
   Accordion,
@@ -28,6 +28,18 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+
+
+interface Flight {
+  link: string | null
+  price: string | null
+  departure_outbound_from: string | null
+  departure_outbound_time: string | null
+  departure_inbound_from: string | null
+  departure_inbound_time: string | null
+}
+
 
 interface TravelInformation {
   destination_countries: string[]
@@ -66,6 +78,7 @@ interface TravelInformation {
     }
     currency: string | null
   }
+  flight: Flight
   additional_notes: {
     text: string | null
   }[]
@@ -136,6 +149,7 @@ export default function PlanPage() {
         }
         const data = await res.json()
         setPlan(data)
+        console.log(data)
       } catch (err: any) {
         console.error(err)
         setError(err.message || "An unknown error occurred.")
@@ -169,13 +183,24 @@ export default function PlanPage() {
 
   const travelInfo = plan?.data
 
+  function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-EN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6">
-      <h1 className="text-3xl font-bold mb-8">Your Trip Plan</h1>
+      <h1 className="text-3xl font-bold mb-8">Your Travel Information</h1>
 
       {travelInfo && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* --- Kolumna boczna --- */}
           <aside className="lg:col-span-1 space-y-8">
             <Card>
               <CardHeader>
@@ -208,6 +233,52 @@ export default function PlanPage() {
                 )}
               </CardContent>
             </Card>
+            
+            {travelInfo.flight && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plane className="w-5 h-5" />
+                    Flight Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                  <div className="space-y-1">
+                    {travelInfo.flight.departure_outbound_from && (
+                      <p><strong>From:</strong> {travelInfo.flight.departure_outbound_from}</p>
+                    )}
+                    {travelInfo.flight.departure_outbound_time && (
+                      <p><strong>Date:</strong> {formatDate(travelInfo.flight.departure_outbound_time)}</p>
+                    )}
+                  </div>
+                  {(travelInfo.flight.departure_inbound_from || travelInfo.flight.departure_inbound_time) && (
+                    <div className="space-y-1 border-t pt-3 mt-3">
+                      <p className="font-semibold">Return</p>
+                      {travelInfo.flight.departure_inbound_from && (
+                        <p><strong>From:</strong> {travelInfo.flight.departure_inbound_from}</p>
+                      )}
+                      {travelInfo.flight.departure_inbound_time && (
+                        <p><strong>Date:</strong> {formatDate(travelInfo.flight.departure_inbound_time)}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="border-t pt-3 mt-3 space-y-2">
+                    {travelInfo.flight.price && (
+                      <p><strong>Total Price:</strong> {travelInfo.flight.price}</p>
+                    )}
+                    {travelInfo.flight.link && (
+                      <Button asChild size="sm" className="w-full">
+                        <a href={travelInfo.flight.link} target="_blank" rel="noopener noreferrer">
+                          View Flight ✈️
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
 
             {travelInfo.travelers_details && travelInfo.travelers_details.length > 0 && (
             <Card>
@@ -278,7 +349,7 @@ export default function PlanPage() {
                       <div key={idx} className="p-3 bg-muted/50 rounded-lg">
                         <div className="flex justify-between font-semibold">
                           <span>{a.city}</span>
-                          <span className="text-sm font-normal text-muted-foreground">{a.check_in} to {a.check_out}</span>
+                          {/* <span className="text-sm font-normal text-muted-foreground">{a.check_in} to {a.check_out}</span> */}
                         </div>
                         {a.chosen_hotel && <p className="text-sm mt-1">✓ Chosen: {a.chosen_hotel}</p>}
                       </div>

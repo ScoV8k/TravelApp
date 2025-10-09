@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Body
-from api.models import  PyObjectId, Checklist, TripInformationDB, TripInformationBase
+from api.models import  PyObjectId, Checklist, TripInformationDB, TripInformationBase, FlightData
 from core.database import trips_information_col
 from datetime import datetime
 from typing import List
@@ -217,3 +217,34 @@ async def delete_checklist_item(trip_id: str, checklist_id: int, item_id: int):
     )
 
     return checklists
+
+
+@router.post("/trip/{trip_id}/flight", response_model=TripInformationDB)
+async def add_flight_to_information(trip_id: str, flight: FlightData = Body(...)):
+    try:
+        trip_object_id = PyObjectId(trip_id)
+        print(flight)
+        result = await trips_information_col.update_one(
+            {"trip_id": trip_object_id},
+            {
+                "$set": {
+                    "data.flight": flight.model_dump(),
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Trip Information not found")
+
+        updated_plan = await trips_information_col.find_one({"trip_id": trip_object_id})
+        if not updated_plan:
+            raise HTTPException(status_code=404, detail="Failed to retrieve updated plan")
+            
+        updated_plan["_id"] = str(updated_plan["_id"])
+        updated_plan["trip_id"] = str(updated_plan["trip_id"])
+        print(updated_plan)
+        return updated_plan
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding flight: {str(e)}")

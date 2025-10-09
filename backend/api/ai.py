@@ -1,13 +1,11 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import List, Dict
 from datetime import datetime
 from bson import ObjectId
-import os
 import json
 import asyncio
-from dotenv import load_dotenv
+
 from core.database import plans_col, trips_col, users_col, trips_information_col
 from travelplan.traveljson import get_empty_plan2
 from chains.chat_chain import chat_chain
@@ -16,42 +14,13 @@ from chains.information_update_chain import information_update_chain
 from enrich import enrich_plan_with_locations
 from api.models import PlanDB
 
-load_dotenv()
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 # MODELE REQUESTÓW
-class TematRequest(BaseModel):
-    message: str
-
-class PromptRequest(BaseModel):
-    prompt: str
-
-class TripInformationUpdateRequest(BaseModel):
-    trip_id: str
-    last_user_message: str
-    bot_response: str
-
 class Demo(BaseModel):
     trip_id: str
     user_message: str
     last_messages: List[Dict]
-
-
-# @app.post("/generate/")
-# async def generate_response(req: TematRequest):
-#     # result = await chat_chain.arun(message=req.message)
-#     result = await chat_chain.ainvoke({"input": req.message})
-#     return {"message": req.message, "response": result}
-
 
 async def try_parse_json(response_text: str, retries: int = 2):
     for attempt in range(retries + 1):
@@ -66,8 +35,7 @@ async def try_parse_json(response_text: str, retries: int = 2):
                 raise HTTPException(status_code=500, detail=f"JSON Error: {str(e)}")
             await asyncio.sleep(1)
 
-
-@app.post("/generate-plan/{trip_id}", response_model=PlanDB)
+@router.post("/generate-plan/{trip_id}", response_model=PlanDB)
 async def generate_and_save_plan(trip_id: str):
     trip_main_doc = await trips_col.find_one({"_id": ObjectId(trip_id)})
     if not trip_main_doc:
@@ -99,6 +67,8 @@ Fill in the plan in JSON. If any data is missing – add your own interesting su
 - Make sure EVERY element in a list or object is SEPARATED by a comma (,).
 - DO NOT use a comma after the last element of a list or object.
 - NEWLINE characters inside strings should be written as \\n (double backslash).
+- Attractions MUST be CONCRETE places (e.g. "Louvre Museum", "Central Park", "Restaurant XYZ") and NOT generic activities (like "walk around the city" or "eat dinner").
+
 
 TRAVEL INFORMATION:
 {json.dumps(travel_information, indent=2)}
@@ -108,7 +78,7 @@ INFORMATION FROM USER:
 
 JSON:
 {json2_skeleton}
-""" 
+"""
 
     response = await plan_generator_chain.llm.ainvoke(raw_prompt)
     response_text = response.content
@@ -135,19 +105,12 @@ JSON:
 
     return new_plan
 
-
-@app.post("/generate-message-and-update-information/")
+@router.post("/generate-message-and-update-information/")
 async def generate_message_and_update_plan(req: Demo, background_tasks: BackgroundTasks):
-    # bot_response = await chat_chain.arun(message=req.user_message)
-
     plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(req.trip_id)})
-
 
     res = await chat_chain.ainvoke({"input": req.user_message, "trip_gathered_information": plan_doc})
     bot_response_text = res["output"]
-    print(res)
-
-
 
     booking_link = None
     price = None
@@ -169,23 +132,16 @@ async def generate_message_and_update_plan(req: Demo, background_tasks: Backgrou
                         departure_inbound_date = flight_data[0].get("inbound_flight").get("departure_time")
                         break
                 except (json.JSONDecodeError, IndexError, KeyError) as e:
-                    print(f"⚠️  Could not extract booking link from tool observation: {e}")
-
-    print(f"✅ Bot response: {bot_response_text}")
-    print(f"🔗 Captured link: {booking_link}")
+                    print(f"⚠️ Could not extract booking link from tool observation: {e}")
 
     background_tasks.add_task(update_plan_in_background, req.trip_id, req.user_message, req.last_messages, plan_doc)
-    # print(bot_response)
-
-
-    # return {"trip_id": req.trip_id, "bot_response": bot_response}
 
     return {
         "trip_id": req.trip_id,
         "bot_response": {
             "text": bot_response_text,
             "link": booking_link,
-            "flight" : {
+            "flight": {
                 "link": booking_link,
                 "price": price,
                 "departure_outbound_from": departure_outbound_from,
@@ -196,11 +152,6 @@ async def generate_message_and_update_plan(req: Demo, background_tasks: Backgrou
         }
     }
 
-# async def update_plan_in_background(trip_id: str, user_message: str, last_messages: List[Dict]):
-
-    # plan_doc = await trips_information_col.find_one({"trip_id": ObjectId(trip_id)})
-    # if not plan_doc:
-    #     return
 async def update_plan_in_background(trip_id: str, user_message: str, last_messages: List[Dict], plan_doc: dict):
     current_plan = plan_doc.get("data", {})
     plan_json_text = await information_update_chain.arun(
@@ -224,8 +175,3 @@ async def update_plan_in_background(trip_id: str, user_message: str, last_messag
 
     print(f"✅ Background plan update done for trip_id: {trip_id}")
     print(new_plan)
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("togetherai:app", host="127.0.0.1", port=8001, reload=True)

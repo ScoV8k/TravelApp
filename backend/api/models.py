@@ -77,27 +77,6 @@ class TripDB(BaseModel):
 
 
 
-# MESSAGES
-class MessageBase(BaseModel):
-    trip_id: PyObjectId
-    text: str
-    isUser: bool
-    timestamp: datetime
-
-    class Config:
-        json_encoders = {ObjectId: str}
-
-class MessageDB(MessageBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    trip_id: PyObjectId
-    text: str
-    isUser: bool
-    timestamp: datetime
-
-    class Config:
-        populate_by_name = True
-        json_encoders = {ObjectId: str}
-
 
 class ChecklistItem(BaseModel):
     id: int
@@ -153,3 +132,33 @@ class PlanDB(BaseModel):
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
 
+
+class FlightData(BaseModel):
+    link: str
+    price: str
+    departure_outbound_from: str
+    departure_outbound_time: str
+    departure_inbound_from: str
+    departure_inbound_time: str
+
+
+
+class MessageBase(BaseModel):
+    trip_id: PyObjectId
+    text: str
+    isUser: bool
+    timestamp: datetime
+    class Config:
+        json_encoders = {ObjectId: str}
+
+
+class MessageDB(MessageBase):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    trip_id: PyObjectId
+    text: str
+    isUser: bool
+    timestamp: datetime
+
+    class Config:
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
